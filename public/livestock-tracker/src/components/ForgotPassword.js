@@ -6,7 +6,6 @@ import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 
 export default function ForgotPassword() {
   const emailRef = useRef();
-  const { resetPassword } = useAuth();
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
