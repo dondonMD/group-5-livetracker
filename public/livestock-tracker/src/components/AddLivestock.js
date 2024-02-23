@@ -1,8 +1,10 @@
 // AddLivestock.js
-import React, { useState } from 'react';
+
 import { Form, Button, Row, Col } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext';
 import MapComponent from './MapComponent'; // Import the MapComponent
+import React, { useState, useEffect } from "react";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 
 function AddLivestock() {
   const { currentUser } = useAuth();
@@ -20,22 +22,53 @@ function AddLivestock() {
       return;
     }
 
+
+
     // Add your logic to add livestock to the database or perform any other actions
     console.log('Adding livestock:', { name, breed, age, livestockLocation });
 
     // Reset form fields
-    setName('');
-    setBreed('');
-    setAge('');
-    setLivestockLocation({ latitude: 0, longitude: 0 }); // Reset livestock location after adding
+    // Reset livestock location after adding
   };
+
+  const handleAddLivestock = async (e) => {
+    e.preventDefault();
+
+    try {
+      const docRef = await addDoc(collection(db, "todos"), {
+        todo: todo,
+      });
+       setName("");
+       setBreed("");
+       setAge("");
+       setLivestockLocation({ latitude: 0, longitude: 0 });
+      console.log("Document written with ID: ", docRef.id);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  };
+
+  const fetchPost = async () => {
+    await getDocs(collection(db, "todos")).then((querySnapshot) => {
+      const newData = querySnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setTodos(newData);
+      console.log(todos, newData);
+    });
+  };
+
+  useEffect(() => {
+    fetchPost();
+  }, []);
 
   return (
     <div>
       <h2>Add Livestock</h2>
       <Row>
         <Col md={6}>
-          <Form>
+          <Form onSubmit={handleAddLivestock}>
             <Form.Group controlId="name">
               <Form.Label>Name</Form.Label>
               <Form.Control
@@ -63,9 +96,7 @@ function AddLivestock() {
                 onChange={(e) => setAge(e.target.value)}
               />
             </Form.Group>
-            <Button variant="primary" onClick={handleAddLivestock}>
-              Add Livestock
-            </Button>
+            <Button variant="primary">Add Livestock</Button>
           </Form>
         </Col>
         <Col md={6}>
