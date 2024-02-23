@@ -9,7 +9,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const { login } = useAuth(); // Assuming you have a login function in your auth context
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); 
   const navigate = useNavigate()
 
   async function handleSubmit(e) {
