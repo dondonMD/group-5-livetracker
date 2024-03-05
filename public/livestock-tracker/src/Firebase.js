@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Table } from 'react-bootstrap'; // Import Table component from react-bootstrap for displaying livestock data
-import { addDoc, collection, getDocs, getFirestore } from 'firebase/firestore';
+import { addDoc, collection, getDocs } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-
+import { getFirestore } from 'firebase/firestore';
+import { getDatabase, ref, onValue } from 'firebase/database';
+import { getAuth } from 'firebase/auth'; // Import getAuth from firebase/auth
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDgABC-3kUS69dT2yFglDk20qnYievsylY",
   authDomain: "live-stock-tracker-ab5a7.firebaseapp.com",
@@ -11,38 +13,37 @@ const firebaseConfig = {
   storageBucket: "live-stock-tracker-ab5a7.appspot.com",
   messagingSenderId: "1023174066627",
   appId: "1:1023174066627:web:92e213a2160aaf24237d76",
-  measurementId: "G-F9YTV1J8B3"
+  measurementId: "G-F9YTV1J8B3",
+  databaseURL: "https://live-stock-tracker-ab5a7-default-rtdb.asia-southeast1.firebasedatabase.app" // Updated database URL
 };
 
 // Initialize Firebase app
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app); // Get the auth instance
-const db = getFirestore();
+const db = getFirestore(app); // Initialize Firestore
+const database = getDatabase(app); // Initialize Realtime Database
+const auth = getAuth(app);
 
-export { app, auth }; // Export 'app' and 'auth'
+
 
 export function AddLivestock() {
   const [name, setName] = useState('');
   const [breed, setBreed] = useState('');
-  const [age, setAge] = useState('');
+  const [age, setAge] = useState(' ');
 
-   
   const handleAddLivestock = async (e) => {
     e.preventDefault();
-   
+
     try {
-        const docRef = await addDoc(collection(db, "livestock_data"), {
-          name: name,
-          breed: breed,
-          age: age
-        });
-        console.log("Document written with ID: ", docRef.id);
-      } catch (e) {
-        console.error("Error adding document: ", e);
-      }
-}
-
-
+      await addDoc(collection(db, "livestock"), {
+        name: name,
+        breed: breed,
+        age: age
+      });
+      console.log("Livestock added successfully");
+    } catch (error) {
+      console.error("Error adding livestock:", error);
+    }
+  };
 
   return (
     <div>
@@ -83,13 +84,13 @@ export function AddLivestock() {
   );
 }
 
-export function YourComponent() {
+export function MapComponent() {
   const [livestock, setLivestock] = useState([]);
 
   useEffect(() => {
     const fetchLivestock = async () => {
       try {
-        const colRef = collection(db, "livestock"); // Update collection reference to 'livestock_data'
+        const colRef = collection(db, "livestock");
         const querySnapshot = await getDocs(colRef);
         const livestockData = querySnapshot.docs.map((doc) => ({
           ...doc.data(),
@@ -104,12 +105,35 @@ export function YourComponent() {
     fetchLivestock().catch((error) => {
       console.log(error.message);
     });
-  }, []);
+
+    // Listen for changes in the Realtime Database and update livestock coordinates
+    const databaseRef = ref(database, 'Coordinates');
+    onValue(databaseRef, (snapshot) => {
+      const coordinatesData = snapshot.val();
+      const updatedLivestockList = livestock.map(livestock => {
+        const { id } = livestock;
+        if (coordinatesData && coordinatesData[id]) {
+          return {
+            ...livestock,
+            latitude: coordinatesData[id].latitude,
+            longitude: coordinatesData[id].longitude
+          };
+        }
+        return livestock;
+      });
+      setLivestock(updatedLivestockList);
+    });
+
+    return () => {
+      // Cleanup Realtime Database listener
+      onValue(databaseRef);
+    };
+  }, [livestock]);
 
   return (
     <div>
       <h2>Livestock Data</h2>
-      <Table striped bordered hover> {/* Use Table component to display livestock data */}
+      <Table striped bordered hover>
         <thead>
           <tr>
             <th>Name</th>
@@ -131,13 +155,5 @@ export function YourComponent() {
   );
 }
 
- // deleting document
-/* const deleteAnimalForm = document.querySelector('delete animal')// from html delete form
- deleteAnimalForm.addEventListener('submit', function(event){
-  event.preventDefault()
-  const docRef = doc(db, 'livestock', deleteAnimalForm.id.value)
-  deleteDoc(docRef)
-  .then(()=>{
-    deleteAnimalForm.requestFullscreen()
-  })
- })*/
+
+export { app, db, database, auth }; // Export Firebase instances

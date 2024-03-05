@@ -4,7 +4,6 @@ import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import AddLivestockForm from "./AddLivestock";
 
-
 function Dashboard() {
   const [error, setError] = React.useState("");
   const { currentUser, logout } = useAuth();
@@ -28,7 +27,7 @@ function Dashboard() {
 
   return (
     <div className="d-flex flex-column align-items-start">
-      <Card style={{ width: "14rem", marginLeft: "1rem", marginTop: "1rem" }}>
+      <Card style={{ width: "14rem", marginLeft: "30px", marginTop: "1rem" }}>
         <Card.Body>
           <h2 className="text-center mb-4">Profile</h2>
           {error && <Alert variant="danger">{error}</Alert>}
@@ -43,22 +42,25 @@ function Dashboard() {
           </Link>
         </Card.Body>
       </Card>
-      <div style={{ marginLeft: "auto", marginRight: "1rem" }}> {/* Apply margin to the left side */}
-    
+      <div style={{ marginLeft: "3rem", marginRight: "1rem" }}>
+        {/* Apply margin to the left side */}
       </div>
-      <AddLivestockForm onAddLivestock={handleAddLivestock} />
-      <Button
-        variant="link"
-        onClick={handleLogout}
-        style={{ marginLeft: "1rem", marginTop: "1rem" }}
-      >
-        Log Out
-      </Button>
+      {/* Pass livestockList and setLivestockList as props to AddLivestockForm */}
+      <AddLivestockForm onAddLivestock={handleAddLivestock} livestockList={livestockList} setLivestockList={setLivestockList} />
+      <div className="d-flex flex-column align-items-center mt-3">
+        <Link to="/livestock-list" className="btn btn-primary">
+          Livestock List
+        </Link>
+        <Button
+          variant="link"
+          onClick={handleLogout}
+          style={{ marginTop: "1rem" }}
+        >
+          Log Out
+        </Button>
+      </div>
     </div>
   );
 }
 
 export default Dashboard;
-
-
-

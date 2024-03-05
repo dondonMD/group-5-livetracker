@@ -9,11 +9,17 @@ import PrivateRoute from "./PrivateRoute";
 import Signup from "./SignUp";
 import AddLivestock from "./AddLivestock";
 import UpdateProfile from "./UpdateProfile";
-import LivestockList from "./LivestockList"; // Import the LivestockList component
+import LivestockList from "./LivestockList";
 
 function App() {
-  // State for livestock list
-  const [livestockList] = useState([]);
+  const [livestockList, setLivestockList] = useState([]); // State for livestock list
+
+  // Function to delete a livestock
+  const deleteLivestock = (id) => {
+    setLivestockList((prevLivestockList) =>
+      prevLivestockList.filter((livestock) => livestock.id !== id)
+    );
+  };
 
   return (
     <Router>
@@ -24,9 +30,29 @@ function App() {
         >
           <div className="w-100" style={{ maxWidth: "400px" }}>
             <Routes>
-              <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-              <Route path="/add-livestock" element={<PrivateRoute><AddLivestock  /></PrivateRoute>} /> {/* Pass setLivestockList to AddLivestock */}
-              <Route path="/livestock-list" element={<PrivateRoute><LivestockList livestockList={livestockList} /></PrivateRoute>} />
+              <Route
+                path="/"
+                element={
+                  <PrivateRoute>
+                    <Dashboard livestockList={livestockList} />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/add-livestock"
+                element={<PrivateRoute><AddLivestock setLivestockList={setLivestockList} /></PrivateRoute>}
+              />
+              <Route
+                path="/livestock-list"
+                element={
+                  <PrivateRoute>
+                    <LivestockList
+                      livestockList={livestockList}
+                      deleteLivestock={deleteLivestock}
+                    />
+                  </PrivateRoute>
+                }
+              />
               <Route path="/update-profile" element={<PrivateRoute><UpdateProfile /></PrivateRoute>} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/login" element={<Login />} />

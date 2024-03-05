@@ -1,72 +1,49 @@
 // AddLivestock.js
-
+import React, { useState } from 'react';
 import { Form, Button, Row, Col } from 'react-bootstrap';
-import { useAuth } from '../context/AuthContext';
 import MapComponent from './MapComponent'; // Import the MapComponent
-import React, { useState, useEffect } from "react";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../Firebase'; // Replace '../path/to/firebaseConfig' with the correct path to your Firebase configuration file
 
-function Dashboard({ livestockList }) { // Pass livestockList as a prop
-  const [error, setError] = React.useState("");
-  const { currentUser, logout } = useAuth();
-  const navigate = useNavigate();
+function AddLivestock({ livestockList, setLivestockList }) {
+  const [livestockName, setLivestockName] = useState('');
+  const [breed, setBreed] = useState('');
+  const [age, setAge] = useState('');
+  const [livestockLocation, setLivestockLocation] = useState({ latitude: -20.163780, longitude: 28.630130 }); // State for livestock location
 
-  async function handleLogout() {
-    setError("");
-
-    try {
-      await logout();
-      navigate("/login");
-    } catch {
-      setError("Failed to log out");
-    }
-  }
-
-  const handleAddLivestock = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // this prevents the page from reloading after submitting the data
 
     try {
-      const docRef = await addDoc(collection(db, "todos"), {
-        todo: todo,
+      const docRef = await addDoc(collection(db, "livestock"), {
+        livestockName: livestockName,
+        age: age,
+        breed: breed,
       });
-       setName("");
-       setBreed("");
-       setAge("");
-       setLivestockLocation({ latitude: 0, longitude: 0 });
+
+      setAge('');
+      setLivestockName('');
+      setBreed('');
+      setLivestockLocation({ latitude: 0, longitude: 0 });
       console.log("Document written with ID: ", docRef.id);
-    } catch (e) {
-      console.error("Error adding document: ", e);
+    } catch (error) {
+      console.error("Error adding document: ", error);
     }
   };
-
-  const fetchPost = async () => {
-    await getDocs(collection(db, "todos")).then((querySnapshot) => {
-      const newData = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      setTodos(newData);
-      console.log(todos, newData);
-    });
-  };
-
-  useEffect(() => {
-    fetchPost();
-  }, []);
 
   return (
     <div>
       <h2>Add Livestock</h2>
       <Row>
         <Col md={6}>
-          <Form onSubmit={handleAddLivestock}>
+          <Form onSubmit={handleSubmit}>
             <Form.Group controlId="name">
               <Form.Label>Name</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Enter name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={livestockName}
+                onChange={(e) => setLivestockName(e.target.value)}
               />
             </Form.Group>
             <Form.Group controlId="breed">
@@ -87,19 +64,21 @@ function Dashboard({ livestockList }) { // Pass livestockList as a prop
                 onChange={(e) => setAge(e.target.value)}
               />
             </Form.Group>
-            <Button variant="primary">Add Livestock</Button>
+            <Button type='submit' variant="primary">
+              Add Livestock
+            </Button>
           </Form>
         </Col>
         <Col md={6}>
-          {/* Render the MapComponent with livestockLocation */}
-          <MapComponent livestockLocation={livestockLocation} />
+          {/* Pass livestockList to MapComponent */}
+          <MapComponent livestockList={livestockList} />
         </Col>
       </Row>
     </div>
   );
 }
 
-export default Dashboard;
+export default AddLivestock;
 
 
 
