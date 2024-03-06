@@ -4,6 +4,7 @@ import { Form, Button, Row, Col } from 'react-bootstrap';
 import MapComponent from './MapComponent'; // Import the MapComponent
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../Firebase'; // Replace '../path/to/firebaseConfig' with the correct path to your Firebase configuration file
+import MyMap from './MyMap';
 
 function AddLivestock({ livestockList, setLivestockList }) {
   const [livestockName, setLivestockName] = useState('');
@@ -19,6 +20,7 @@ function AddLivestock({ livestockList, setLivestockList }) {
         livestockName: livestockName,
         age: age,
         breed: breed,
+        location: livestockLocation,
       });
 
       setAge('');
@@ -30,6 +32,7 @@ function AddLivestock({ livestockList, setLivestockList }) {
       console.error("Error adding document: ", error);
     }
   };
+  console.log(livestockList)
 
   return (
     <div>
@@ -71,7 +74,8 @@ function AddLivestock({ livestockList, setLivestockList }) {
         </Col>
         <Col md={6}>
           {/* Pass livestockList to MapComponent */}
-          <MapComponent livestockList={livestockList} />
+          {/* <MapComponent livestockList={livestockList} /> */}
+          <MyMap livestockList={livestockList} />
         </Col>
       </Row>
     </div>

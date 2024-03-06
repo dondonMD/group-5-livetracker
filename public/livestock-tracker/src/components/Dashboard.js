@@ -4,11 +4,11 @@ import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import AddLivestockForm from "./AddLivestock";
 
-function Dashboard() {
+function Dashboard({livestockList, setLivestockList}) {
   const [error, setError] = React.useState("");
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  const [livestockList, setLivestockList] = React.useState([]);
+  
 
   async function handleLogout() {
     setError("");
@@ -24,7 +24,7 @@ function Dashboard() {
   const handleAddLivestock = (newLivestock) => {
     setLivestockList([...livestockList, newLivestock]);
   };
-
+console.log(livestockList)
   return (
     <div className="d-flex flex-column align-items-start">
       <Card style={{ width: "14rem", marginLeft: "30px", marginTop: "1rem" }}>
